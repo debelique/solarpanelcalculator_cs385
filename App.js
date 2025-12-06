@@ -44,6 +44,7 @@ function SolarFormComponent(props) {
     const [season, setSeason] = useState("summer");
     const [sunData, setSundata] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [panelsNeeded, setPanelsNeeded] = useState(0); 
     const [error, setError] = useState(null);
     
     async function loadSunData(seasonArg) {
@@ -91,10 +92,11 @@ function SolarFormComponent(props) {
         let kWhWeNeedToProducePerHour =  totalkWhWeNeedToProduce / totalHoursProducingPower;
         let onePanelProducesWPerHour = selectedPanel_var.NameplatePmax;
         let onePanelProduceskWPerHour = onePanelProducesWPerHour / 1000;
-        let panelsNeeded = kWhWeNeedToProducePerHour / onePanelProduceskWPerHour;
+        let panelsNeeded = Math.ceil(kWhWeNeedToProducePerHour / onePanelProduceskWPerHour);
         
         console.log(panelsNeeded);
-        // Assume inverter efficiency of 85%
+        setPanelsNeeded(panelsNeeded);
+        // TODO: Assume inverter efficiency of 85%
         
     }
     
@@ -115,6 +117,7 @@ function SolarFormComponent(props) {
                 </select>
             </p>
             <p><button onClick={calculateUsage}>Calculate</button></p>
+            <p>You will need: <label id="panelsNeeded">{panelsNeeded}</label> panels to disconnect from the grid.</p>
         </>
       );
 }
