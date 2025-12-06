@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { createRoot } from 'react-dom/client'
+// global variables
+const URL = "https://raw.githubusercontent.com/debelique/solarpanelcalculator_cs385/refs/heads/main/";
 
 function App() {
   const [data, setData] = useState([]);
@@ -7,11 +8,12 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const URL = "https://raw.githubusercontent.com/debelique/solarpanelcalculator_cs385/refs/heads/main/PV_Module_List_Full_Data_ADAmicro.json";
-
+    const URLPanels = `${URL}PV_Module_List_Full_Data_ADAmicro.json`;
+   
     async function fetchData() {
       try {
-        const response = await fetch(URL);
+          console.log(URLPanels);
+        const response = await fetch(URLPanels);
         const dataJson = await response.json();
         setLoading(true);
         setData(dataJson);
@@ -23,7 +25,7 @@ function App() {
 
     fetchData();
   }, []); // end of useEffect
-
+    
   if (error) {
     return <h1>Opps! An error has occurred: {error.toString()}</h1>;
   } else if (loading === false) {
@@ -31,32 +33,72 @@ function App() {
   } else {
     return (
       <>
-        <SolarFormComponent data={data} />
+        <SolarFormComponent APIData={data}/>
       </>
     );
   }
 } // end App() function or component
 
 function SolarFormComponent(props) {
-    const [kWhMonth, setkWhMonth] = useState(375);
+    const [kWhMonth, setkWhMonth] = useState(375); 
+    const [season, setSeason] = useState("summer");
+    const [sunData, setSundata] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    
+    async function loadSunData(seasonArg) {
+          try {
+            const URLsundata = `${URL}openweather.co.uk_${seasonArg}.json`;
+            const response = await fetch(URLsundata);
+            const dataJson = await response.json();
+            setSundata(dataJson);
+          } catch (error) {
+            setError(error);
+            setLoading(false);
+          }
+    }
+    
+    useEffect(() => {
+        loadSunData(season);
+    }, []);
+    
+    function changekWh(e)
+    {
+        setkWhMonth(e.target.value);
+    }
+    
+    function changeSeason(e)
+    {
+        setSeason(e.target.value);
+        loadSunData(e.target.value);
+    }
+
+    function calculateUsage(e)
+    {
+        console.log("DATA:*************");
+        console.log(season);
+        console.log(sunData);
+        console.log(kWhMonth);
+        console.log(props.APIData);
+    }
     
     return (
         <>
             <h1>Solar Net Zero Calculator</h1>
-            <p>How much panels do you need to disconnect from the grid</p>
+            <p>How much panels do you need to disconnec from the grid</p>
             <p>
                 <label>How much kW/h do you use per month:</label>
-                <input id="kWhMonth" type="text" value={kWhMonth}  onChange={(e) => setkWhMonth(e.target.value)} />
+                <input id="kWhMonth" type="text" value={kWhMonth} onChange={changekWh}/>
             </p>
-            <PanelDropDownComponent APIData={props.data} />
+            <PanelDropDownComponent APIData={props.APIData} />
             <p>
                 <label> Enter season: </label>
-                <select id="Season">
-                    <option value="Summer"> Summer </option>
-                    <option value="Winter"> Winter </option> 
+                <select id="Season" onChange={changeSeason}>
+                    <option value="summer">Summer</option>
+                    <option value="winter">Winter</option> 
                 </select>
             </p>
-            <p><button>Calculate</button></p>
+            <p><button onClick={calculateUsage}>Calculate</button></p>
         </>
       );
 }
@@ -66,8 +108,9 @@ function PanelDropDownComponent(props) {
     const handleChange = (event) => {
         setSelectedPanel(event.target.value);
     };
-    const selectedPanel_var = props.APIData.find((element) => element.Id == selectedPanel);
 
+    const selectedPanel_var = props.APIData.find((element) => element.Id == selectedPanel);
+   
     return (
         <>
             <p>
@@ -78,18 +121,22 @@ function PanelDropDownComponent(props) {
                          ))}
                     </select>
             </p>
+            <p>
+                Selected Value: <span className="answer">
+                    {selectedPanel.length === 0 ? "No option selected" : selectedPanel}
+            </span>
+            </p>
             <PanelDetailsComponent data={selectedPanel_var}/>
          </>
     );
 }
 
 function PanelDetailsComponent(props) {
-    //console.log("value >>", props);
     if (props.data)
     {
         return (
             <>
-             <p><label>Manufacturer:</label> <span>{props.data.Manufacturer}</span></p>
+            <p><label>Manufacturer:</label> <span>{props.data.Manufacturer}</span></p>
             <p><label>Description:</label> <span>{props.data.Description}</span></p>
             <p><label>Power:</label> <span>{props.data.NameplatePmax}</span></p>
             <p><label>Voltage:</label> <span>{props.data.NameplateVpmax}</span></p>               
