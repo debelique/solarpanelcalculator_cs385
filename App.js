@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createRoot } from 'react-dom/client'
 
 function App() {
   const [data, setData] = useState([]);
@@ -30,7 +31,7 @@ function App() {
   } else {
     return (
       <>
-        <SolarFormComponent APIData={data} />
+        <SolarFormComponent data={data} />
       </>
     );
   }
@@ -42,12 +43,12 @@ function SolarFormComponent(props) {
     return (
         <>
             <h1>Solar Net Zero Calculator</h1>
-            <p>How much panels do you need to disconnec from the grid</p>
+            <p>How much panels do you need to disconnect from the grid</p>
             <p>
                 <label>How much kW/h do you use per month:</label>
-                <input id="kWhMonth" type="text" value={kWhMonth}/>
+                <input id="kWhMonth" type="text" value={kWhMonth}  onChange={(e) => setkWhMonth(e.target.value)} />
             </p>
-            <PanelDropDownComponent APIData={props.APIData} />
+            <PanelDropDownComponent APIData={props.data} />
             <p>
                 <label> Enter season: </label>
                 <select id="Season">
