@@ -75,11 +75,27 @@ function SolarFormComponent(props) {
 
     function calculateUsage(e)
     {
+        let selectedPanelDropDown = document.getElementById('panel');
+        let selectedPanelId = selectedPanelDropDown.value;
+        let selectedPanel_var = props.APIData.find((element) => element.Id == selectedPanelId);
+        
         console.log("DATA:*************");
-        console.log(season);
-        console.log(sunData);
         console.log(kWhMonth);
-        console.log(props.APIData);
+        //Solar raduation
+        console.log(sunData.list[0].radiation.ghi);
+
+        // Assuming season is 3 months
+        // Assume effective sunlight summer 18h winter 8h. No clouds
+        let totalkWhWeNeedToProduce = 3 * kWhMonth;
+        let totalHoursProducingPower = 3 * 30 * (season == "summer") ? 18 :  8;
+        let kWhWeNeedToProducePerHour =  totalkWhWeNeedToProduce / totalHoursProducingPower;
+        let onePanelProducesWPerHour = selectedPanel_var.NameplatePmax;
+        let onePanelProduceskWPerHour = onePanelProducesWPerHour / 1000;
+        let panelsNeeded = kWhWeNeedToProducePerHour / onePanelProduceskWPerHour;
+        
+        console.log(panelsNeeded);
+        // Assume inverter efficiency of 85%
+        
     }
     
     return (
@@ -121,11 +137,6 @@ function PanelDropDownComponent(props) {
                          ))}
                     </select>
             </p>
-            <p>
-                Selected Value: <span className="answer">
-                    {selectedPanel.length === 0 ? "No option selected" : selectedPanel}
-            </span>
-            </p>
             <PanelDetailsComponent data={selectedPanel_var}/>
          </>
     );
@@ -146,4 +157,3 @@ function PanelDetailsComponent(props) {
 }
 
 export default App;
-
