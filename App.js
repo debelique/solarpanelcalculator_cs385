@@ -88,7 +88,7 @@ function SolarFormComponent(props) {
     // Assuming season is 3 months
     // Assume effective sunlight summer 18h winter 8h. No clouds
     let totalkWhWeNeedToProduce = 3 * kWhMonth;
-    let totalHoursProducingPower = 3 * 30 * (season == "summer") ? 18 : 8;
+    let totalHoursProducingPower = 3 * 30 * (season === "summer" ? 18 : 8);
     let kWhWeNeedToProducePerHour =
       totalkWhWeNeedToProduce / totalHoursProducingPower;
     let onePanelProducesWPerHour = selectedPanel_var.NameplatePmax;
@@ -209,3 +209,4 @@ function PanelDetailsComponent(props) {
 }
 
 export default App;
+
